@@ -1,0 +1,290 @@
+This file is never called anywhere. This file is for my personal use.
+Almost like a readme file. A readme file will be added to the Github repo.
+
+
+//What do i need to implement for lab 6 and 7?
+
+//Lab 6
+-----------Submitting Your Assignment
+Upload an executable jar file to Canvas for grading. I should be able to double-click on the jar file to run your program. The jar file must include your images. You may use your own images if you wish. I recommend testing your executable jar in a location away from the development directory to verify that you are reading the images from the jar an not from the file system.
+Upload a second jar or zip file that contains all of your .java files for archiving. I need a copy of your source code to meet accreditation requirements, but please, to save disk space, don't zip an entire project - just include the source code.
+
+-----------Requirements
+Produce a Mah Jong board similar to this:
+
+
+-- Arrange the tiles randomly
+Remove a tile when it is clicked on by the left mouse button (just single tiles, no game rules yet)
+Add a background image such as the following (included in the images jar file) or use an image of your choice. 
+A dragon image that may be used for the playing board background.
+Note that this image is used without permission - it may only be used for this project and may not be published.
+
+-----------Extra Credit
+Draw the basic shadows (explained below): +5
+Draw extended shadows in addition to the basic shadows: +5 (+10 total)
+
+-----------Managing The Tiles
+It is frequently the case that complex components displayed in a graphical Java program require two representations: one visible and one logical. This organization follows the model-view-controller paradigm (MVC) used in the design of the Smalltalk graphical user interface (GUI) and used extensively in Java GUI programming (see section 12.1 in the text). In the Mah Jong program, the visible aspects of a tile are realized when the tile is "added" to a parent container (such as a JFrame or a JPanel). The visible aspect of the project began in the previous assignment and continues here. This assignment also includes the logical representation necessary for implementing the logical operations or rules upon which the behavior of the Mah Jong game depends. The following UML diagram shows how I implemented the visible aspect of the game as a class named MahJongBoard and the logical features as a class named MahJongModel.
+
+
+-----------Dealing and Configuring The Tiles
+Use the TileDeck class created in Lab 4 to create and deal the tiles. Your program will likely need three nested for-loops, one loop each for the rows, columns, and layers. You will deal and configure the tiles one at a time in the inner most loop. As each tile, t, is dealt:
+
+Make the tile a mouse event source: t.addMouseListener(listener);
+Store the tile in the model; the location in the model is determined by the loop control variables of the three nested for-loops
+I found it convenient to add instance variables to the Tile class so that the tile could "remember" its logical location in the model. If you do this, then set the variables here (see positionTile below). Please note that the Java API already defines methods named getX() and getY(), which means that you shouldn't use these method names.
+You must be able to map the tile's location in the model to the location on the playing board specified as an x,y pair in Java's pixel coordinates. When I implemented the data structure as a 3-D array, this is how I mapped the model's row, column, layer coordinates to the graphical coordinates needed to paint the tile: Logical To Graphical Coordinates. Set the tile's location: t.setLocation(x, y); where x and y are the two-dimensional pixel coordinates
+
+-----------MahJongModel
+The tiles are visually arranged in layers: Tile Layers Actions  . You must build a data structure that is able to represent the relations between the tiles that are inherent in the visual layout. That is, given a tile, what tiles lie to its left, to its right, and on top of it? Your data structure must also provide a way to systematically access each tile's location. Four "special cases" complicate this last requirement: the left-most tile, the two right-most tiles, and the top tile.
+
+Your data structure must be able to support the following operations. However, how you perform these operations depends heavily on your data structure itself and you are free to name and to implement the operations as you wish.
+
+Place a tile in the data structure. For example, if your data structure is a three-dimensional array, then you could use three nested for-loops to create and position each tile. I created a general-purpose method, implemented in MahJongModel, to position each tile once it was instantiated: 
+void positionTile(Tile t, int x, int y, int z)
+Locate given tile's neighbors. Specifically, the program needs to determine if a given tile is "open" as a part of game play. An open tile does not have a tile on top of it or on either its left or right side. I defined a method 
+boolean isTileOpen(Tile t) 
+I also created a method that returned a tile based on its location: 
+Tile getTile(int x, int y, int z) 
+How you access each tile will depend on your data structure.
+For extra credit, you may draw shadows on the tiles, which requires knowing if a given tile has "neighbors" above it that can cast shadows. You must be able to locate tiles in layers above a given tile and that are offset left or right.
+
+-- Starting Ideas
+Here are a few possible ideas to get you started, but you are not required to follow any of them - you may freely implement the data structure that seems best to you.
+
+Place the tiles in a three-dimensional array (most students take this approach because they already have some experience with arrays and it is overall the easiest to understand):
+Tile[] tiles = new Tile[#rows][#cols][#layers];
+The irregularity of the bottom layer makes this challenging but it is possible. You can store the special case tiles in the 3-D array or store them in separate variables.
+Create a class or classes that extends ArrayList
+Represent each row of tiles with an instance of this class
+Let the class have instance variables that denote the starting point of the row (the anchor) as an x,y pair
+This is my favorite approach, but I only recommend it if you are very comfortable with inheritance and polymorphism
+Create six links in each tile: north, south, east, west, up, and down to point at each neighbor. Either embed the links in the Tile class. Although I got this to work, this approach was by far the hardest to implement of the various data structures that I tried. while it's interesting, I don't recommend it.
+It is desirable, as much as is possible, to separate the data model from the view. However, the final program is sensitive to the order in which the tiles are added and therefore the order in which they are painted. Specifically if two tiles are painted at the same location (one tile on top of the other), then first tile added to the visual representation appears on the top. This is the order in which I added (and painted) the tiles: Tile Order Actions  . But note, the order that you paint, and therefore the order that you add the tiles to the board, is a function of which direction the tile "leans" to produce the 3D effect.
+
+-----------MahJongBoard
+Although it is possible to place the tiles directly onto the JFrame, I recommend creating a JPanel to hold the tiles (you can see this in the UML diagram above). This provides greater flexibility in creating the final GUI. Below are the classes representing one of my implementations:
+
+There are a few preparatory steps that you must take before placing the tiles on the game board:
+
+The container (a JPanel) must not have a layout manager because there is no layout manager that corresponds to the pattern of tiles used in the game. Instead, you must call the setLocation method to place the tile.
+If the tile is not placed in a layout manager, then you must do a setSize (it is okay to leave the setPreferredSize in place).
+The final step depends on how you are drawing the tile. Most of you will need to make the tile transparent:
+setOpaque(false);
+Experiment and see which way looks best.
+
+-----------Removing A Tile
+Follow the Die and DieDemo example to see how to set up the event handling and how to actually remove a component from a container. In general, you will need to:
+
+Make each tile the source of a mouse event
+Make the container (e.g., MahJongBoard) the listener
+In the event handler method, remove the the tile from the board.
+In my implementation, I removed the tile from the panel: If t is the tile that generated the event:
+remove(t);
+Some students have added a binary variable to the Tile class. If the variable is true, they paint the tile; if the variable is false, they do not paint the tile. The event handler simply changes the value stored in this variable.
+Remember to call repaint at the end of the event handler.
+Create "dummy" methods for the remaining methods specified by the MouseListener interface.
+
+
+-----------Executable Jar Files
+An executable jar file contains all .class files and all resources (i.e., images) packaged into a single file. You make a jar file executable by creating and adding a manifest file to the jar. A manifest can contain many program descriptors, but it must minimally name the startup class file:
+
+Main-Class: MahJong
+
+Note that the text is case sensitive and that the line muse end with a new-line. You may name the manifest file anything you wish. The following example of how to build an excutable jar file assumes (a) the manifest file is named "manifest" and that the images are in a subdirectory named "images" placed below the .class files (the Java standard location).
+
+jar cvmf manifest MahJong.jar *.class images
+
+You must also modify how you access the images. See pp. 570-571 for the code that does this, but replace Resource.class with Tile.class or PictureTile.class (or a class name that is appropriate for your program). (You can also see an example in Die.java - the version that appears with six images representing the faces of a die - see the static block at the bottom.)
+
+Test your jar file by moving to a new location (the desktop for example) away from where you developed the program (you are verifying that the resources are being found in the jar and not in the file system).
+
+-----------Drawing The Shadows
+Drawing shadows above (or below, depending on how your tiles are drawn) and to the side of a tile enhances the three-dimensional effect. It is also one of the most difficult parts of the program. It is easy to draw a shadow, but drawing a shadow in the right place at the right time is more difficult. Note that you must draw an image (or in the case of Mah Jong, the tiles) before drawing a shadow on top if it. In the paintComponent method (a) get the old composite, (b) create a new "dim" composite (the argument value to the derive method varies between 0.0 and 1.0 where 1 is the darkest), (c) set the composite, (d) set the clip, (e) draw a shape (a filled polygon works well), and (f) restore the old context:
+
+Graphics2D	g2 = (Graphics2D)g;
+Composite	cOld = g2.getComposite();
+Composite	cNew = ((AlphaComposite)cOld).derive(0.25F);
+g2.setComposite(cNew);
+g.setClip(shadow);
+g.fillPolygon(shadow);
+g2.setComposite(cOld);
+The difficult part of drawing shadows is determining where to draw them and taking into consideration all of the possible variations that arise as tiles are removed (I spent most of my time with this lab trying to draw the shadows and subsequently refactoring the code). Maintaining the shadows as tiles are removed (and restored in the next lab) is challenging.
+
+You may need to modify your tile classes to draw the shadows. I increased the size of each tile and offset the characters, figures, and images slightly, and drew the shadows on the added space of the tile. Depending on how you implemented your tiles, your modifications may be minor or substantial.
+
+If you wish to further implement shadows: I found it convenient to have a separate method to calculate the shadow, if any, that a tile would cast. I called this method after all of the tiles were laid out on the Mah Jong board and at the end of the event handler that removes the tiles from the board. Also, remember to call repaint after calculating the shadows (I needed to add a paintComponent to MahJongBoard that initially only called super.paintComponent, but then added code to draw the background image).
+
+Basic Shadows consist of the shadows as illustrated in the Mah Jong board above: the shadows cast when all of the tiles are placed but game play has not started.
+
+Extended Shadows are dynamic, changing as tiles are removed from or added to the board. The shadows must take into account all of the tiles that could possibly cast a shadow.
+
+I implemented the extended shadows two ways: The first way did not allow any shadows overlap and create darker areas.  This was the most challenging implementation.  The second way allowed shadows to overlap.  You can decide which way looks best; either implementation will receive the extra credit.  Here are the diagrams and tables I built to help me solve the shadows problem: 
+
+//Lab 7
+
+-----------Submitting Your Assignment
+This is an individual assignment. Please do your own work.
+Upload an executable jar file to Canvas for scoring. I should be able to double-click on the jar file to run your program.
+Create and upload a second jar or zip file containing your source code for archiving. There are no restrictions on paths or subdirectories contained in either type of file.
+If you implement any of the extra credit features, please let me know with a comment.
+
+
+-----------Program Requirements
+Three tasks remain to convert Lab #6 in to a fully operational game:
+
+Create a method that validates that a tile is open may be removed (i.e., that at least one side - left or right - does not have a neighbor and there is no neighbor above it). It's not important what you name the method but I called my implementation isOpen.
+Implement a way to select, remember, and identify an open tile with one mouse click so that it can be paired with the tile selected by the next mouse click (see the Puzzle program example). "Highlight" the first selected tile by drawing a border around it, placing an animation on it, changing it color, etc.
+Validate that two selected tiles "match" and can therefore be removed. You created the matches method as a part of lab 3. Verify that your method identifies correct matches as follows:
+Two tiles match if they are the same kind of tile and
+Circle and Bamboo if their ranks are equal
+Character tiles if their characters are the same
+Any two season tiles match as do any two flower tiles.
+There are several other features that, although are not needed to make a fully functional game, improve on the playing experience. These five features are required but are relatively simple to implement:
+
+The ability to see or review all the tiles removed during play. There are several ways to do this:
+(a) Add a scroll pane at one of the border regions on the playing board and add the removed tiles to it. The scroll pane can be programatically scrolled so that the last tiles are visible (see ScrollDemo.java) or the tiles can be added to the beginning or top of the scroll pane: add(tile, 0);
+
+(b) The scroll pane can be placed in either a JFrame or a JOptionPane and temporarily displayed whenever the player wishes to see the removed tiles and then disposed or dismissed. The frame or option pane is displayed in response to user triggering a control (described below). See Help.java for an example of displaying and disposing a temporary JFrame. See PickListDemo to see how to use the "message trick" with a JOptionPane to display a scroll pane. You may display just one of the removed tiles as they are removed in pairs or you may display both tiles.
+
+Everyone's favorite: an "undo" command. Your undo operation must be able to restore all removed tiles back to the game board. Think about placing the tiles in a stack when they are removed from the board. Returning tiles to the board is the most challenging part of this task and this is discussed in detail below. Alternatively, some students include a boolean field in the Tile class. If the variable is true, they paint the tile; if the variable is false, they don't paint the tile (i.e., paintComponent returns early). Even if you use the boolean "trick," you will need to call setLocation on a tile once it has been placed in the removed tiles display.
+A restart game command. How can the same game be played again? I can think of two ways to do this:
+(a) "undo" the last move until the stack is empty, or
+
+(b) start the game over with the same "random" seed. If you use the Collections shuffle method, note that there are two versions - one version uses "a default source of randomness" and the second accepts a Random object as its source of randomness. Next, note that the Random class has two constructors. The first constructor uses an internal seed (most likely the system clock). The second constructor accepts a "seed," which "is the initial value of the internal state of the pseudorandom number generator." (There is also a setSeed(seed) method in the Random class.) Each time the seed is set to a given value, the Random object will produce the same sequence of "random" numbers. Finally note that the System class has a method, currentTimeMillis, that returns the time in milliseconds since the epic (i.e., "since the world began"). At game startup, save the time in an instance variable, use it as the seed, and it becomes quite easy to shuffle the tiles in the same order again.
+
+Allow the user to play the same, numbered game again. This is similar to option b above. If the user chooses this option, the game is given a five or six digit number, which is displayed somewhere on the game board (the title bar is a good choice). The player may play the same game by entering the game number at startup. The sequence of player choices might look like this: the player chooses a repeatable, numbered game; the player then chooses either a new game or enters the number of previous game. A new game number can be calculated by taking the return value of currentTimeMillis and modding by 100,000 (five digit number) or 1,000,000 (six digit number).
+When the last pair of tiles are removed, display a "rewards screen" with fireworks and sound. The rewards screen will be written as a demonstration as part of the chapter 14 discussion of threads.
+Finally, a "new game" command rounds out the required functionality. This command initiates a new game. If there is currently a game in progress, that game is discarded (upon the player's approval).
+
+
+-----------Z-Order And Returning the Tiles to the Board
+Returning the tiles to the board so that they draw correctly is the only "tricky" part of this assignment 
+(which the boolean variable mention above skirts around). This operation is tricky because the order of 
+the tiles in the container (the z-order) is the order in which they are drawn on the game board and having 
+the correct drawing order is crucial for showing the correct tile overlap. The tile's position in the container 
+(its z-order) must be captured before the tile is removed from the game board and stored somewhere. 
+A simple approach is to define another instance field in the Tile class (zOrder) to store the z-order.
+
+The Container class (in the awt package) defines two very useful methods:
+
+int getComponentZOrder(Component comp)
+void setComponentZOrder(Component comp, int index)
+
+The "trick" is determining what object makes the call to these methods. In the case of the Mah Jong game, 
+it is the game board. In general, an easy way to get a reference to any component's immediate container or 
+parent is with the getParent() method. For example, suppose that we have three JPanels: P1, P2, and P3. 
+The three panels are nested inside each other: P1.add(P2) and P2.add(P3). Then P3.getParent() returns P2, and 
+P3.getParent().getParent() returns P1.  See my code at the end of this section.
+
+A Tile is a JPanel through inheritance, and a JPanel is a Component. Therefore, a call to getComponentZOrder 
+can elegantly determine a given tile's z-order. When the tile is returned to the game board, an overloaded version 
+of the "add" method can return it to its original location (i.e., restore its z-order). This example assumes that "t" 
+is the tile that is being returned to the game board as a result of an "undo" operation:
+
+board.add(t, t.getZOrder());
+
+Alternatively, you can use a sequence of statements:
+
+board.add(t);
+board.setComponentZOrder(t, t.getZOrder());
+The pseudo code for the remove operation is:
+
+    z-order2 = get z-order(tile2)
+    board.remove(tile2)
+    z-order1 = get z-order(tile1)
+    board.remove(tile1)
+And for the undo operation or restore operation:
+
+    board.add(tile1, z-order1)
+    board.add(tile2, z-order2)
+or
+
+    board.add(tile1)
+    board.add(tile2)
+    board.setComponentZOrder(tile1, z-order1)
+    board.setComponentZOrder(tile2, z-order2)
+I defined three Tile methods to manage a tile'z z-order:
+
+    public void setZOrder()
+    {
+        zOrder = getParent().getComponentZOrder(this);
+    }
+
+
+    public void resetZOrder()
+    {
+        getParent().setComponentZOrder(this, zOrder);
+    }
+
+
+    public int getZOrder()
+    {
+        return zOrder;
+    }
+
+
+-----------GUI Controls
+Each of the operations described above and the extra credit operations described below 
+need a GUI control to launch or activate them. Add a menu bar at the top of the game, 
+and add menus and menu items as needed to initiate each of these operations. 
+The menu items may have a textual or graphic label (or both if you choose). 
+Each menu item should have appropriate mnemonics, accelerators, and an appropriate tool 
+tip to briefly document its purpose or action (see MenuDemo.java). If you choose to put images on your menu items, 
+you may find the "standard" Java images (Links to an external site.) useful. 
+You may also use your own images (images with a transparent background look good on Java buttons and menu items).
+
+The following is a required list of menus and menu items. 
+Items marked with an asterisk are extra-credit options
+(and menu items are only required if you implement the corresponding features).
+
+Game
+Play -- start a new game
+Restart -- restart the current game
+Numbered -- play a numbered (and therefore a repeatable game)
+Tournament* -- start a game in tournament mode
+Sound
+On Off
+Move
+Undo -- click tiles or provide a control to restore the tiles to the game board Redo*
+Help
+Operation (this help page must describe how to use your implementation of the game)
+Game Rules (this help page must describe the rules of the game)
+You are welcome to use the Help.java class in your MahJong program to implement the operation and game rule. 
+The Help class is designed to display simple HTML page. Please note that the the link in the comments no longer takes 
+you to the Java Icons used by the Help class - get the icons here: Java_Icons.zip).
+If you chose to display the removed tiles in a JFrame or a JOPtionPane, you should also 
+include a control to display the tiles.
+
+Sound will be covered in a threading demonstration in chapter 14.
+
+Add simple help screens to describe how to use your game and the game rules. 
+You may use the Help.java class for this assignment. (Write your help files in HTML.) 
+As is common with Java programs, you should place the help files in a sub-directory.
+
+Finally, some operations (e.g., exiting or restarting the game or starting a new game) 
+should give the player the chance to cancel the operation. This is easy to do with the 
+appropriate JOptionPane. Don't forget to deal with the "X" button at the top right of the 
+game window.
+
+-----------Extra Credit
+The two following features are not required but you may implement either or 
+both for extra credit. Add the appropriate controls to the menus.
+
+Tournament Mode
+Okay, so people don't typically play solitaire games competitively, but it could happen. 
+In tournament mode, you should
+disable or ignore the undo, restart, and numbered game controls 
+(and redo if it's implemented). See pp. 414 - 419 for enabling and disabling menu items
+display the current score (the number of tiles removed)
+display the elapsed time since the game started (this will be covered in class)
+suppress the display of the removed tiles (either disable the control or don't place 
+the tiles in the removed tile display)
+the score and the elapsed time may be displayed either on the title bar or on another 
+panel added to one of the border regions
+-----------Redo
+You may undo a long sequence of moves (that is, you return the tiles to the game board) 
+but then decide that you should not have "undone" the moves. 
+The redo control lets you replay the tiles, one pair at a time. 
+However, once the player plays a pair of tiles in the normal way, 
+the redo stack should be invalidated or emptied.
